@@ -1,0 +1,81 @@
+#include "SPI.h"
+#include "TFT_22_ILI9225.h"
+#include "math.h"
+
+#define TFT_RST A4
+#define TFT_RS  A3
+#define TFT_CS  A5  // SS
+#define TFT_SDI A2  // MOSI
+#define TFT_CLK A1  // SCK
+#define TFT_LED 0   // 0 if wired to +5V directly
+
+// Use hardware SPI (faster - on Uno: 13-SCK, 12-MISO, 11-MOSI)
+//TFT_22_ILI9225 tft = TFT_22_ILI9225(TFT_RST, TFT_RS, TFT_CS, TFT_LED);
+// Use software SPI (slower)
+TFT_22_ILI9225 tft = TFT_22_ILI9225(TFT_RST, TFT_RS, TFT_CS, TFT_SDI, TFT_CLK, TFT_LED);
+int radius = 150; 
+
+String duration;
+unsigned long startTime;
+float x_coord, y_coord; 
+float arr[51];
+
+// Setup
+void setup() {
+  tft.begin();
+  Serial.begin(9600);
+
+  tft.drawCircle(0, 110, 150, COLOR_BLUE);
+  
+}
+
+// Loop
+void loop() {
+
+  
+  startTime = millis();
+  tft.setBackgroundColor(COLOR_WHITE);
+  
+  tft.setFont(Terminal6x8); 
+  int i = 0;
+  int counter = 0;
+  for(long theta = 40; theta  <= 90; theta++ ){
+
+   
+    //x_coord = cos(theta * 3.14/180) * radius; not needed
+    y_coord = sin(theta * 3.14/180) * radius;
+    arr[counter] = y_coord; 
+    
+    counter++; 
+    tft.drawLine(0, 110,  y_coord , i, COLOR_GREEN);
+
+    // guessed these vals
+    
+    if (theta < 55)
+       i++;
+    else if  (theta < 60)
+       i = i + 2; 
+    else 
+       i = i + 3; 
+    // plot random pixels to simulate moving targets 
+    //tft.drawPixel(theta, i - 1,  COLOR_DARKVIOLET); 
+      
+  } // end for 
+
+  i = 115;
+   for ( int j = 0; j <= 50; j++){
+      
+       tft.drawLine(0, 110,  arr[50 - j] , i , COLOR_GREEN);
+        if  (j < 20)
+         i = i + 2; 
+         else 
+           i = i + 3; 
+     
+   } // end for 
+   
+   
+   tft.clear();
+   tft.drawCircle(0, 110, 150, COLOR_BLUE);
+  
+  
+}
